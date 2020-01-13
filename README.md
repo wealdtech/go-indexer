@@ -1,13 +1,13 @@
-# go-ecodec
+# go-indexer
 
-[![Tag](https://img.shields.io/github/tag/wealdtech/go-ecodec.svg)](https://github.com/wealdtech/go-ecodec/releases/)
-[![License](https://img.shields.io/github/license/wealdtech/go-ecodec.svg)](LICENSE)
-[![GoDoc](https://godoc.org/github.com/wealdtech/go-ecodec?status.svg)](https://godoc.org/github.com/wealdtech/go-ecodec)
-[![Travis CI](https://img.shields.io/travis/wealdtech/go-ecodec.svg)](https://travis-ci.org/wealdtech/go-ecodec)
-[![codecov.io](https://img.shields.io/codecov/c/github/wealdtech/go-ecodec.svg)](https://codecov.io/github/wealdtech/go-ecodec)
-[![Go Report Card](https://goreportcard.com/badge/github.com/wealdtech/go-ecodec)](https://goreportcard.com/report/github.com/wealdtech/go-ecodec)
+[![Tag](https://img.shields.io/github/tag/wealdtech/go-indexer.svg)](https://github.com/wealdtech/go-ecodec/releases/)
+[![License](https://img.shields.io/github/license/wealdtech/go-indexer.svg)](LICENSE)
+[![GoDoc](https://godoc.org/github.com/wealdtech/go-indexer?status.svg)](https://godoc.org/github.com/wealdtech/go-ecodec)
+[![Travis CI](https://img.shields.io/travis/wealdtech/go-indexer.svg)](https://travis-ci.org/wealdtech/go-ecodec)
+[![codecov.io](https://img.shields.io/codecov/c/github/wealdtech/go-indexer.svg)](https://codecov.io/github/wealdtech/go-ecodec)
+[![Go Report Card](https://goreportcard.com/badge/github.com/wealdtech/go-indexer)](https://goreportcard.com/report/github.com/wealdtech/go-ecodec)
 
-Go module providing encryption and decryption of byte-level data.
+Go module providing simple index of strings to UUIDs.
 
 
 ## Table of Contents
@@ -20,10 +20,10 @@ Go module providing encryption and decryption of byte-level data.
 
 ## Install
 
-`go-ecodec` is a standard Go module which can be installed with:
+`go-indexer` is a standard Go module which can be installed with:
 
 ```sh
-go get github.com/wealdtech/go-ecodec
+go get github.com/wealdtech/go-indexer
 ```
 
 ## Usage
@@ -36,24 +36,12 @@ package main
 import (
     "fmt"
 
-    ecodec "github.com/wealdtech/go-ecodec"
+    indexer "github.com/wealdtech/go-indexer"
 )
 
 func main() {
-    data := []byte("The data to be encrypted")
-    key := []byte("my secret passphrase")
+    indexer := index.New()
 
-    encryptedData, err := ecodec.Encrypt(data, key)
-    if err != nil {
-        panic(err)
-    }
-
-    decryptedData, err := ecodec.Decrypt(encryptedData, key)
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Printf("Decrypted data is %q\n", string(decryptedData))
 }
 ```
 ## Maintainers
@@ -62,7 +50,7 @@ Jim McDonald: [@mcdee](https://github.com/mcdee).
 
 ## Contribute
 
-Contributions welcome. Please check out [the issues](https://github.com/wealdtech/go-ecodec/issues).
+Contributions welcome. Please check out [the issues](https://github.com/wealdtech/go-indexer/issues).
 
 ## License
 
