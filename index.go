@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package indexer provides an indexing system between names and UUIDs.
 package indexer
 
 import (
