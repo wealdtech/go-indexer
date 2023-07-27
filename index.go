@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // Index maps between names and IDs.
@@ -33,6 +34,7 @@ func New() *Index {
 	return &Index{
 		names: make(map[uuid.UUID]string),
 		ids:   make(map[string]uuid.UUID),
+		mutex: sync.RWMutex{},
 	}
 }
 
@@ -99,7 +101,7 @@ type indexEntry struct {
 func Deserialize(data []byte) (*Index, error) {
 	var entries []*indexEntry
 	if err := json.Unmarshal(data, &entries); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to unmarshal data")
 	}
 
 	index := New()
@@ -113,6 +115,7 @@ func Deserialize(data []byte) (*Index, error) {
 // Serialize serializes an index.
 func (i *Index) Serialize() ([]byte, error) {
 	entries := make([]*indexEntry, 0)
+
 	i.mutex.RLock()
 	for k, v := range i.names {
 		entries = append(entries, &indexEntry{
@@ -122,5 +125,10 @@ func (i *Index) Serialize() ([]byte, error) {
 	}
 	i.mutex.RUnlock()
 
-	return json.Marshal(entries)
+	data, err := json.Marshal(entries)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal data")
+	}
+
+	return data, nil
 }
