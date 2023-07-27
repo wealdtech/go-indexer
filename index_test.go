@@ -1,4 +1,4 @@
-// Copyright 2020 Weald Technology Trading
+// Copyright 2020 - 2023 Weald Technology Trading.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 package indexer_test
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
@@ -77,4 +78,36 @@ func TestIndexSerDeser(t *testing.T) {
 	foundID, exists = index.ID(name2)
 	assert.True(t, exists)
 	assert.Equal(t, foundID, id2)
+}
+
+func TestConcurrency(t *testing.T) {
+	index := indexer.New()
+
+	// Create a number of runners that will try to add and remove indices simultaneously.
+	var runWG sync.WaitGroup
+	var setupWG sync.WaitGroup
+	starter := make(chan any)
+	for i := 0; i < 64; i++ {
+		setupWG.Add(1)
+		runWG.Add(1)
+		go func() {
+			setupWG.Done()
+			id, err := uuid.NewRandom()
+			require.NoError(t, err)
+			name := id.String()
+			<-starter
+			index.Add(id, name)
+			require.True(t, index.IDKnown(id))
+			require.True(t, index.NameKnown(name))
+			index.Remove(id, name)
+			runWG.Done()
+		}()
+	}
+	// Wait for setup to complete.
+	setupWG.Wait()
+	// Start the jobs by closing the channel.
+	close(starter)
+
+	// Wait for run to complete
+	runWG.Wait()
 }

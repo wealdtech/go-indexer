@@ -16,6 +16,7 @@ package indexer
 
 import (
 	"encoding/json"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -24,6 +25,7 @@ import (
 type Index struct {
 	names map[uuid.UUID]string
 	ids   map[string]uuid.UUID
+	mutex sync.RWMutex
 }
 
 // New creates a new index.
@@ -36,39 +38,55 @@ func New() *Index {
 
 // Add adds an entry to this index.
 func (i *Index) Add(id uuid.UUID, name string) {
+	i.mutex.Lock()
 	i.names[id] = name
 	i.ids[name] = id
+	i.mutex.Unlock()
 }
 
 // Remove removes an entry from this index.
 func (i *Index) Remove(id uuid.UUID, name string) {
+	i.mutex.Lock()
 	delete(i.names, id)
 	delete(i.ids, name)
+	i.mutex.Unlock()
 }
 
 // Name fetches the name of an entry given its ID.
 // If present the second return value will be true, otherwise false.
 func (i *Index) Name(id uuid.UUID) (string, bool) {
+	i.mutex.RLock()
 	res, exists := i.names[id]
+	i.mutex.RUnlock()
+
 	return res, exists
 }
 
 // NameKnown returns true if this name is known.
 func (i *Index) NameKnown(name string) bool {
+	i.mutex.RLock()
 	_, exists := i.ids[name]
+	i.mutex.RUnlock()
+
 	return exists
 }
 
 // ID fetches the ID of an entry given its name.
 // If present the second return value will be true, otherwise false.
 func (i *Index) ID(name string) (uuid.UUID, bool) {
+	i.mutex.RLock()
 	res, exists := i.ids[name]
+	i.mutex.RUnlock()
+
 	return res, exists
 }
 
 // IDKnown returns true if this ID is known.
 func (i *Index) IDKnown(id uuid.UUID) bool {
+	i.mutex.RLock()
 	_, exists := i.names[id]
+	i.mutex.RUnlock()
+
 	return exists
 }
 
@@ -88,17 +106,21 @@ func Deserialize(data []byte) (*Index, error) {
 	for _, entry := range entries {
 		index.Add(entry.ID, entry.Name)
 	}
+
 	return index, nil
 }
 
 // Serialize serializes an index.
 func (i *Index) Serialize() ([]byte, error) {
 	entries := make([]*indexEntry, 0)
+	i.mutex.RLock()
 	for k, v := range i.names {
 		entries = append(entries, &indexEntry{
 			ID:   k,
 			Name: v,
 		})
 	}
+	i.mutex.RUnlock()
+
 	return json.Marshal(entries)
 }
